@@ -23,7 +23,8 @@ class Ship {
   friend Bullets;
   friend OpenGLWindow;
   friend StarLayers;
-
+  int fase_atual;
+  
   GLuint m_program{};
   GLint m_translationLoc{};
   GLint m_colorLoc{};

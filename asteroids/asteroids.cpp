@@ -96,12 +96,12 @@ Asteroids::Asteroid Asteroids::createAsteroid(glm::vec2 translation,
   asteroid.m_color.a = randomIntensity(re);
   asteroid.m_color.b= randomIntensity(re);
   asteroid.m_color.g= randomIntensity(re);
+  
   asteroid.m_rotation = 0.0f;
   asteroid.m_scale = scale;
   asteroid.m_translation = translation;
 
-  float fator= usuario.getFase();
-
+  float fator=(fase_atual+0.5)/2;
   // Choose a random angular velocity
   asteroid.m_angularVelocity = m_randomDist(re) * fator;
 

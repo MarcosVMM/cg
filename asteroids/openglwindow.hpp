@@ -29,7 +29,10 @@ class OpenGLWindow : public abcg::OpenGLWindow {
 
   int m_viewportWidth{};
   int m_viewportHeight{};
-
+  float velocidade_x;
+  float velocidade_y;
+  int velocidade;
+  float fator_screencolor;
   GameData m_gameData;
 
   Asteroids m_asteroids;

@@ -7,7 +7,7 @@
 #include "abcg.hpp"
 #include "gamedata.hpp"
 #include "ship.hpp"
-#include "user.hpp"
+
 
 class OpenGLWindow;
 
@@ -21,7 +21,8 @@ class Asteroids {
 
  private:
   friend OpenGLWindow;
-  user usuario;
+
+  int fase_atual;
   GLuint m_program{};
   GLint m_colorLoc{};
   GLint m_rotationLoc{};

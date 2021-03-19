@@ -62,8 +62,10 @@ void OpenGLWindow::initializeGL() {
   // Load a new font
   ImGuiIO &io{ImGui::GetIO()};
   auto filename{getAssetsPath() + "Inconsolata-Medium.ttf"};
+
   m_font = io.Fonts->AddFontFromFileTTF(filename.c_str(), 60.0f);
   m_font2 = io.Fonts->AddFontFromFileTTF(filename.c_str(), 25.0f);
+
   if (m_font == nullptr) {
     throw abcg::Exception{abcg::Exception::Runtime("Cannot load font file")};
   }
@@ -75,7 +77,12 @@ void OpenGLWindow::initializeGL() {
   m_objectsProgram = createProgramFromFile(getAssetsPath() + "objects.vert",
                                            getAssetsPath() + "objects.frag");
 
-  glClearColor(0, 0, 0, 1);
+ 
+   glClearColor(0, 0, 0, 0.5);
+ 
+
+
+ 
 
 #if !defined(__EMSCRIPTEN__)
   glEnable(GL_PROGRAM_POINT_SIZE);
@@ -92,19 +99,24 @@ void OpenGLWindow::initializeGL() {
   usuario.setVida(usuario.getMaxVida());
   usuario.setFase(1);
   usuario.setWin(0);
+  
+  m_bullets.fase_atual=usuario.getFase();
+  m_asteroids.fase_atual=usuario.getFase();
+  m_ship.fase_atual=usuario.getFase();
+  velocidade=0;
 
-  m_bullets.fase_atual=usuario.getFase();;
-
-  restart();
+// Inicio do jogo
+  if(m_gameData.m_state != State::Menu) restart();
 }
 
 void OpenGLWindow::restart() {
+if(m_gameData.m_state != State::Menu){
   m_gameData.m_state = State::Playing;
-
   m_starLayers.initializeGL(m_starsProgram, 25);
   m_ship.initializeGL(m_objectsProgram);
   m_asteroids.initializeGL(m_objectsProgram, 3);
   m_bullets.initializeGL(m_objectsProgram);
+}
 
 }
 
@@ -112,7 +124,7 @@ void OpenGLWindow::update() {
   float deltaTime{static_cast<float>(getDeltaTime())};
 
   // Wait 5 seconds before restarting
-  if (m_gameData.m_state != State::Playing &&
+  if (m_gameData.m_state != State::Playing && m_gameData.m_state != State::Menu &&
       m_restartWaitTimer.elapsed() > 5) {
     restart();
     return;
@@ -130,7 +142,8 @@ void OpenGLWindow::update() {
 }
 
 void OpenGLWindow::paintGL() {
-  update();
+  if(m_gameData.m_state != State::Menu)
+    update();
 
   glClear(GL_COLOR_BUFFER_BIT);
   glViewport(0, 0, m_viewportWidth, m_viewportHeight);
@@ -141,6 +154,7 @@ void OpenGLWindow::paintGL() {
   m_ship.paintGL(m_gameData);
 }
 
+// Print tela
 void OpenGLWindow::paintUI(){
 
   if (m_gameData.m_state == State::Playing) {
@@ -150,7 +164,7 @@ void OpenGLWindow::paintUI(){
     auto size{ImVec2(300, 85)};
     auto position{ImVec2((m_viewportWidth - size.x) / 2.0f + 100.0f,
                          0)};
-    //std::cout<<m_viewportHeight - size.y << std::endl;
+   
     ImGui::SetNextWindowPos(position);
     ImGui::SetNextWindowSize(size);
     ImGuiWindowFlags flags{ImGuiWindowFlags_NoBackground |
@@ -165,12 +179,48 @@ void OpenGLWindow::paintUI(){
       strcpy(str_life, "Vidas: "); strcat(str_life, pchar);
       ImGui::Text(str_life);
 
+//Velocidade
+     
+      velocidade_x = m_ship.m_velocity[0] * m_ship.m_velocity[0] ;
+      velocidade_y= m_ship.m_velocity[1] * m_ship.m_velocity[1];
+      velocidade = sqrt(velocidade_x + velocidade_y) * 100;
+      
+      char str_veloc[20];
+      std::string s1 = std::to_string(velocidade);
+      char const *pchar1 = s1.c_str();  //use char const* as target type
+      strcpy(str_veloc, "Velocidade: "); strcat(str_veloc, pchar1);
+      strcat(str_veloc, " km/h");
+      ImGui::Text(str_veloc);
+  
+
 
     ImGui::PopFont();
     ImGui::End();
   }
   }
-  else{
+  else if(m_gameData.m_state == State::Menu){
+    abcg::OpenGLWindow::paintUI();
+    auto size{ImVec2(800, 180)};
+    auto position{ImVec2((m_viewportWidth - size.x) / 2.0f + 200.0f,
+                         (m_viewportHeight - size.y) / 2.0f - 200)};
+    ImGui::SetNextWindowSize(size);
+    ImGui::SetNextWindowPos(position);
+    ImGui::Columns(3, NULL, true);
+
+    if (ImGui::Button("Start", ImVec2(100, 80))){
+        m_gameData.m_state = State::Playing;
+        restart();
+      }
+      ImGui::NextColumn();
+      if (ImGui::Button("Option", ImVec2(100, 80))){
+        ImGui::ShowDemoWindow();
+      }
+      ImGui::NextColumn();
+      if (ImGui::Button("Sair", ImVec2(100, 80))){
+        m_gameData.m_state = State::Playing;
+        restart();
+      }
+  }else{
   abcg::OpenGLWindow::paintUI();
 
   {
@@ -187,10 +237,12 @@ void OpenGLWindow::paintUI(){
   
     if (m_gameData.m_state == State::GameOver) {
           
-          if(usuario.getVida()==usuario.getMaxVida()) {
-          ImGui::Text("Game Over!");
+          if(usuario.getVida()==usuario.getMaxVida() && usuario.getWin()==0) {
+            ImGui::Text("Game Over!");
+            m_gameData.m_state = State::Menu;
           } else if (usuario.getWin()==1){
             ImGui::Text("*You Win");
+            m_gameData.m_state = State::Menu;
           }
     } else if (m_gameData.m_state == State::Win) {
       
@@ -201,8 +253,7 @@ void OpenGLWindow::paintUI(){
         strcpy(str_fase, "Fase: "); strcat(str_fase, pchar);
         ImGui::Text(str_fase);
          
-        }
-       
+    }
     ImGui::PopFont();
     ImGui::End();
     }
@@ -236,12 +287,17 @@ void OpenGLWindow::checkCollisions() {
     if (distance < m_ship.m_scale * 0.9f + asteroid.m_scale * 0.85f) {
       
       m_gameData.m_state = State::GameOver;
+
       int vida=usuario.getVida();
       if(vida>0) usuario.setVida(vida-1);
       else {
         usuario.setVida(usuario.getMaxVida());
         usuario.setFase(1);
-        m_bullets.fase_atual=1;
+        m_bullets.fase_atual=usuario.getFase();
+        m_asteroids.fase_atual=usuario.getFase();
+        m_ship.fase_atual=usuario.getFase();
+        glClearColor(0,0,0,0.5);
+        fator_screencolor=0;
       }
       usuario.setWin(0);
       m_restartWaitTimer.restart();
@@ -288,17 +344,28 @@ void OpenGLWindow::checkCollisions() {
 
 void OpenGLWindow::checkWinCondition() {
   if (m_asteroids.m_asteroids.empty()) {
+
     if(usuario.getFase() < usuario.getMaxFase()){
       m_gameData.m_state = State::Win;
       usuario.setFase(usuario.getFase()+1);
       usuario.setWin(0);
+      float fator1;
+      fator1 = 0.1*usuario.getFase();
+      fator_screencolor += 0.15;
+      glClearColor(1-fator1, fator_screencolor, fator_screencolor-fator1, 0.5);
+
     } else {
       m_gameData.m_state = State::GameOver;
       usuario.setVida(usuario.getMaxVida());
       usuario.setFase(1);
       usuario.setWin(1);
+      glClearColor(0, 0, 0, 0.5);
+      fator_screencolor=0;
     }
     m_bullets.fase_atual=usuario.getFase();
+    m_asteroids.fase_atual=usuario.getFase();
+    m_ship.fase_atual=usuario.getFase();
+
     m_restartWaitTimer.restart();
   }
 }

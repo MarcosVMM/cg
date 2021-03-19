@@ -87,30 +87,34 @@ void Bullets::update(Ship &ship, const GameData &gameData, float deltaTime) {
 
       // Bullets are shot in the direction of the ship's forward vector
       glm::vec2 forward{glm::rotate(glm::vec2{0.0f, 1.0f}, ship.m_rotation)};
-      glm::vec2 right{glm::rotate(glm::vec2{1.0f, 0.0f}, ship.m_rotation)};
 
-        //Central cannon bullets
-      glm::vec2 left{glm::rotate(glm::vec2{2.0f, 0.0f}, ship.m_rotation)};
+      glm::vec2 right1{glm::rotate(glm::vec2{1.4f, 0.5f}, ship.m_rotation)};
+       glm::vec2 left1{glm::rotate(glm::vec2{-1.4f, 0.5f}, ship.m_rotation)};
+
+        //Second cannon bullets
+      glm::vec2 right2{glm::rotate(glm::vec2{1.7f, -0.2f}, ship.m_rotation)};
+      glm::vec2 left2{glm::rotate(glm::vec2{-1.7f, -0.2f}, ship.m_rotation)};
 
       auto cannonOffset{(11.0f / 15.5f) * ship.m_scale};
       auto bulletSpeed{2.0f};
 
       Bullet bullet{.m_dead = false,
-                    .m_translation = ship.m_translation + right * cannonOffset,
+                    .m_translation = ship.m_translation + right1 * cannonOffset,
                     .m_velocity = ship.m_velocity + forward * bulletSpeed};
       m_bullets.push_back(bullet);
 
-      bullet.m_translation = ship.m_translation - right * cannonOffset;
+      bullet.m_translation = ship.m_translation + left1 * cannonOffset;
       m_bullets.push_back(bullet);
 
-      bullet.m_translation = ship.m_translation + left * cannonOffset;
+      bullet.m_translation = ship.m_translation + right2 * cannonOffset;
       m_bullets.push_back(bullet);
 
-       bullet.m_translation = ship.m_translation - left * cannonOffset;
+       bullet.m_translation = ship.m_translation + left2 * cannonOffset;
       m_bullets.push_back(bullet);
       
+      
       float factor= (fase_atual+0.5)/2.0f;
-      std::cout<< fase_atual;
+      
       // Moves ship in the opposite direction
       ship.m_velocity -= forward * 0.1f * factor;
     }

@@ -2,6 +2,8 @@
 
 #include <glm/gtx/fast_trigonometry.hpp>
 #include <glm/gtx/rotate_vector.hpp>
+#include <iostream>
+#include <stdio.h>
 
 void Ship::initializeGL(GLuint program) {
   terminateGL();
@@ -17,39 +19,51 @@ void Ship::initializeGL(GLuint program) {
   m_velocity = glm::vec2(0);
 
   // clang-format off
-  std::array<glm::vec2, 31> positions{
+  std::array<glm::vec2, 37> positions{
+
       // Ship body
-      glm::vec2{0.0f, +10.0f}, glm::vec2{-5.0f, +5.0f},
-      glm::vec2{0.0f, +7.5f}, glm::vec2{5.0f, 5.0f},
-      glm::vec2{-10.0f, 0.0f}, glm::vec2{0.0f, 2.5f}, glm::vec2{10.0f, 0.0f},
-      glm::vec2{-15.0f, -5.0f}, glm::vec2{+15.0f, -5.0f},
-      //glm::vec2{+20.5f, +02.5f}, glm::vec2{+02.5f, +12.5f},
+      glm::vec2{0.0f, +20.0f}, glm::vec2{-7.0f, +11.0f},
+      glm::vec2{0.0f, +14.0f}, glm::vec2{7.0f, 11.0f},
+      glm::vec2{-14.0f, 2.0f}, glm::vec2{0.0f, 7.5f}, glm::vec2{14.0f, 2.0f},
+      glm::vec2{-21.0f, -2.0f}, glm::vec2{+21.0f, -2.0f},
+      
 
       // Cannon left 1
-      glm::vec2{-10.0f, 0.0f}, glm::vec2{-10.0f, +04.0f},
-      glm::vec2{-8.0f, +0.0f}, glm::vec2{-08.0f, +04.0f},
+      glm::vec2{-16.5f, 2.0f}, glm::vec2{-16.5f, +5.0f},
+      glm::vec2{-14.0f, 2.0f}, glm::vec2{-14.0f, +05.0f},
 
       // Cannon Left 2
-      glm::vec2{-15.0f, -5.0f}, glm::vec2{-15.0f, -1.0f},
-      glm::vec2{-13.0f, -5.0f}, glm::vec2{-13.0f, -1.0f},
+      glm::vec2{-21.0f, -2.0f}, glm::vec2{-21.0f, 2.0f},
+      glm::vec2{-18.0f, -2.0f}, glm::vec2{-18.0f, 2.0f},
 
       // Cannon Right 1
-      glm::vec2{10.0f, 0.0f}, glm::vec2{10.0f, +04.0f},
-      glm::vec2{8.0f, +0.0f}, glm::vec2{08.0f, +04.0f},
+      glm::vec2{16.5f, 02.0f}, glm::vec2{16.5f, +05.0f},
+      glm::vec2{14.0f, 02.0f}, glm::vec2{14.0f, +05.0f},
 
       // Cannon Right 2
-      glm::vec2{15.0f, -5.0f}, glm::vec2{15.0f, -1.0f},
-      glm::vec2{13.0f, -5.0f}, glm::vec2{13.0f, -1.0f},
+      glm::vec2{21.0f, -2.0f}, glm::vec2{21.0f, 2.0f},
+      glm::vec2{18.0f, -2.0f}, glm::vec2{18.0f, 2.0f},
       
+      //Propulsor left
+      glm::vec2{-10.0f, -5.0f}, 
+      glm::vec2{-7.0f, 0.0f}, 
+      glm::vec2{-4.0f, -5.0f},
+
+    //Propulsor Right
+      glm::vec2{10.0f, -5.0f}, 
+      glm::vec2{7.0f, 0.0f}, 
+      glm::vec2{4.0f, -5.0f},
+
       // Thruster trail (left)
-      glm::vec2{-11.0f, -5.0f}, 
-      glm::vec2{-9.0f, -15.0f}, 
-      glm::vec2{-7.0f, -5.0f},
+      glm::vec2{-10.0f, -5.0f}, 
+      glm::vec2{-7.0f, -14.0f}, 
+      glm::vec2{-4.0f, -5.0f},
 
       // Thruster trail (right)
-     glm::vec2{7.0f, -5.0f}, 
-      glm::vec2{9.0f, -15.0f}, 
-      glm::vec2{11.0f, -5.0f},
+      glm::vec2{10.0f, -5.0f}, 
+      glm::vec2{7.0f, -14.0f}, 
+      glm::vec2{4.0f, -5.0f},
+
       };
 
   // Normalize
@@ -63,7 +77,6 @@ void Ship::initializeGL(GLuint program) {
                      2, 5, 6,
                      5, 7, 8,
                    
-                  
                      // Cannons
                      9, 10, 11,
                      10, 11, 12,
@@ -74,10 +87,14 @@ void Ship::initializeGL(GLuint program) {
                      21, 22, 23,
                      22, 23, 24,
 
+                    //Propulsores
+                      25, 26, 27,
+                     28, 29, 30,
                      
                      // Thruster trails
-                     25, 26, 27,
-                     28, 29, 30};
+                     31, 32, 33,
+                     34, 35, 36
+                     };
   // clang-format on
 
   // Generate VBO
@@ -137,14 +154,25 @@ void Ship::paintGL(const GameData &gameData) {
       // 50% transparent
       glUniform4f(m_colorLoc, 1, 0.5, 0.5, 0.5f);
 
-      glDrawElements(GL_TRIANGLES, 15 * 3, GL_UNSIGNED_INT, nullptr);
+      glDrawElements(GL_TRIANGLES, 17 * 3, GL_UNSIGNED_INT, nullptr);
 
       glDisable(GL_BLEND);
     }
   }
 
+  // Color ship
   glUniform4fv(m_colorLoc, 1, &m_color.r);
-  glDrawElements(GL_TRIANGLES, 13 * 3, GL_UNSIGNED_INT, nullptr);
+  glDrawElements(GL_TRIANGLES, 15 * 3, GL_UNSIGNED_INT, nullptr);
+
+  glUniform4f(m_colorLoc, 1, 0.5, 0.5, 1.0f);
+  glDrawElements(GL_TRIANGLES, 5 * 3, GL_UNSIGNED_INT, nullptr);
+  
+  glUniform4f(m_colorLoc, 0.5, 0.5, 0.5, 1.0f);
+  glDrawElements(GL_TRIANGLES, 4 * 3, GL_UNSIGNED_INT, nullptr);
+
+  glUniform4f(m_colorLoc, 1, 1, 0.5, 1.0f);
+  glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_INT, nullptr);
+ 
 
   glBindVertexArray(0);
 
@@ -168,7 +196,9 @@ void Ship::update(const GameData &gameData, float deltaTime) {
   if (gameData.m_input[static_cast<size_t>(Input::Up)] &&
       gameData.m_state == State::Playing) {
     // Thrust in the forward vector
+    float fator= (fase_atual+0.5)/2.0;
     glm::vec2 forward = glm::rotate(glm::vec2{0.0f, 1.0f}, m_rotation);
-    m_velocity += forward * deltaTime;
+    m_velocity += forward * deltaTime * fator;
+   
   }
 }
